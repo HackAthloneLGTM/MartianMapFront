@@ -1,0 +1,11 @@
+.page {
+  width: 100%;
+  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-xl);
+  box-sizing: border-box;
+}
+
+.map {
+  width: 100%;
+  height: min(70vh, 640px);
+  min-height: 420px;
+}
