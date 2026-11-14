@@ -5,7 +5,7 @@
 }
 
 .map {
-  width: 100%;
-  height: min(70vh, 640px);
-  min-height: 420px;
+  width: min(100%, calc(100vh - 60px));
+  aspect-ratio: 1;
+  margin-inline: auto;
 }
