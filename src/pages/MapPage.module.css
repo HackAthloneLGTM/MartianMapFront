@@ -4,8 +4,32 @@
   box-sizing: border-box;
 }
 
-.map {
+.mapWrapper {
   width: min(100%, calc(100vh - 60px));
   aspect-ratio: 1;
   margin-inline: auto;
+  position: relative;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.buttonContainer {
+  position: relative !important;
+  top: 25px !important;
+  z-index: 1000;
+  top: var(--mantine-spacing-md );
+  left: var(--mantine-spacing-md);
+  right: var(--mantine-spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-xs);
+  pointer-events: none;
+}
+
+.buttonContainer > * {
+  pointer-events: auto;
 }
