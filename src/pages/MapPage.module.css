@@ -7,6 +7,18 @@
   box-sizing: border-box;
 }
 
+.radiationBar {
+  position: fixed;
+  top: 60px;
+  bottom: 0;
+  left: 0;
+  width: 240px;
+  padding: var(--mantine-spacing-md);
+  border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+  z-index: 1100;
+}
+
 .mapWrapper {
   width: min(110%, calc(110vh - 60px));
   aspect-ratio: 1;
@@ -17,6 +29,7 @@
 .map {
   width: 100%;
   height: 100%;
+  background-color: #000;
 }
 
 .buttonContainer {

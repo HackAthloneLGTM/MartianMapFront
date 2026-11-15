@@ -33,6 +33,12 @@ type RoutePoint = {
   col: number;
 };
 
+type RouteResponse = {
+  path?: RoutePoint[];
+  straightLine?: { path?: RoutePoint[] };
+  metrics?: { doseMSv?: number } | null;
+};
+
 const TILE_SIZE = 256;
 
 function MapClickHandler({
@@ -114,6 +120,7 @@ export function MapPage() {
   const [pinB, setPinB] = useState<Pin | null>(null);
   const [routePath, setRoutePath] = useState<RoutePoint[]>([]);
   const [straightLinePath, setStraightLinePath] = useState<RoutePoint[]>([]);
+  const [radiationDoseMicroSv, setRadiationDoseMicroSv] = useState<number | null>(null);
   const [pinAIsLeastRecentlyUsed, setPinAIsLeastRecentlyUsed] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -157,6 +164,7 @@ export function MapPage() {
     setPinAIsLeastRecentlyUsed(!pinAIsLeastRecentlyUsed);
     setRoutePath([]);
     setStraightLinePath([]);
+    setRadiationDoseMicroSv(null);
     setStatus(null);
   };
 
@@ -197,10 +205,7 @@ export function MapPage() {
         throw new Error(message);
       }
 
-      const result = (await response.json()) as {
-        path?: RoutePoint[];
-        straightLine?: { path?: RoutePoint[] };
-      };
+      const result = (await response.json()) as RouteResponse;
       if (
         !Array.isArray(result.path) ||
         result.path.some(
@@ -221,9 +226,13 @@ export function MapPage() {
       ) {
         throw new Error('Route response did not contain a valid straight-line path.');
       }
+      if (typeof result.metrics?.doseMSv !== 'number' || !Number.isFinite(result.metrics.doseMSv)) {
+        throw new Error('Route response did not contain a valid radiation dose.');
+      }
 
       setRoutePath(result.path);
       setStraightLinePath(result.straightLine.path);
+      setRadiationDoseMicroSv(result.metrics.doseMSv * 1000);
       setStatus('Path calculated successfully.');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Unable to calculate path.');
@@ -232,6 +241,14 @@ export function MapPage() {
 
   return  (
     <main className={classes.page}>
+      <aside className={classes.radiationBar}>
+        <Text size="sm" fw={700}>Radiation</Text>
+        <Text size="xl">
+          {radiationDoseMicroSv === null
+            ? 'No route calculated'
+            : `${radiationDoseMicroSv.toFixed(2)} µSv`}
+        </Text>
+      </aside>
       <div className={classes.mapWrapper}>
         <MapContainer
           className={classes.map}
