@@ -49,11 +49,49 @@ type RouteResult = {
 type Meta = {
   width: number;
   height: number;
+  elevation: {
+    min: number;
+    max: number;
+  };
   defaults: {
     doseRateMSvPerDay: number;
     walkingSpeedKmh: number;
+    slopeClasses: (SlopeClass & { label: string })[];
   };
 };
+
+const ELEVATION_COLORS = ['#2b83ba', '#abdda4', '#ffffbf', '#fdae61', '#d7191c'];
+
+const SLOPE_COLORS = ['#1a9641', '#a6d96a', '#fdae61', '#d7191c'];
+
+function MapKey({ whichMap, meta }: { whichMap: boolean; meta: Meta }) {
+  if (whichMap) {
+    return (
+      <div className={classes.key}>
+        <div className={classes.keyGradient} style={{ background: `linear-gradient(to right, ${ELEVATION_COLORS.join(', ')})` }} />
+        <Group justify="space-between">
+          <Text className={classes.statLabel}>{meta.elevation.min.toFixed(1)} m</Text>
+          <Text className={classes.statLabel}>{meta.elevation.max.toFixed(1)} m</Text>
+        </Group>
+      </div>
+    );
+  }
+
+  return (
+    <Group className={classes.key} justify="center" gap="lg">
+      {meta.defaults.slopeClasses.map((slopeClass, index, slopeClasses) => {
+        const lower = index > 0 ? slopeClasses[index - 1].maxDeg : 0;
+        const range = slopeClass.multiplier === null ? `>${lower}°` : `${lower}-${slopeClass.maxDeg}°`;
+        return (
+          <Group key={slopeClass.label} gap={6} wrap="nowrap" title={slopeClass.label}>
+            <span className={classes.keySwatch} style={{ backgroundColor: SLOPE_COLORS[Math.min(index, SLOPE_COLORS.length - 1)] }} />
+            <Text className={classes.statLabel}>{range}</Text>
+          </Group>
+        );
+      })}
+    </Group>
+  );
+}
 
 const clamp = (value: number, max: number) => Math.min(Math.max(value, 0), max - 1);
 
@@ -299,6 +337,7 @@ export function MapPage() {
                 {routeLine && <Polyline positions={routeLine} pathOptions={{ color: colorScheme === 'dark' ? '#ffffff' : '#000000', weight: 3 }} />}
               </MapContainer>
             </div>
+            {meta && <MapKey whichMap={whichMap} meta={meta} />}
             <Container className={classes.buttonContainer}>
               <Group justify="center">
                 <Button onClick={clearPins} variant="default" w={220} className={classes.button}>Clear pins</Button>

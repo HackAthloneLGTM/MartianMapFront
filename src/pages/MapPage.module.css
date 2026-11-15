@@ -7,7 +7,7 @@
 
 .mapWrapper {
   width: 100%;
-  height: calc(100svh - 260px);
+  height: calc(100svh - 290px);
   min-height: 320px;
   position: relative;
 }
@@ -96,4 +96,21 @@
 
 .fullWidth {
   grid-column: 1 / -1;
+}
+
+.key {
+  margin-top: var(--mantine-spacing-sm);
+}
+
+.keyGradient {
+  height: 12px;
+  margin-bottom: 4px;
+  border: 1px solid var(--mantine-color-default-border);
+}
+
+.keySwatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--mantine-color-default-border);
 }
