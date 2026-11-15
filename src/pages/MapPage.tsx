@@ -343,7 +343,7 @@ export function MapPage() {
               >
                 <MapClickHandler onPlacePin={placePin} />
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  attribution='&copy; <a href="https://marsoweb.nas.nasa.gov/hirise/">NASA HiRISE</a> contributors'
                   noWrap
                   url={`http://localhost:3001/${currentMap.tileName}/{z}/{x}/{y}/png`}
                 />
