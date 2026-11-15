@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import classes from './MapPage.module.css';
 import { useState } from 'react';
 import { Button, Container, Group, Text } from '@mantine/core';
-import "./moveme.css"
 
 type Point = {
   x: number;
