@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import classes from './MapPage.module.css';
 import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Container, Divider, Grid, Group, Paper, SimpleGrid, Stack, Text, Title, useComputedColorScheme } from '@mantine/core';
-import "./moveme.css"
 
 type RasterPoint = {
   row: number;
