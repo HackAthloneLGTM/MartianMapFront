@@ -27,11 +27,24 @@ type RouteMetrics = {
   doseMSv: number;
 };
 
+type RouteWarning = {
+  code: 'STEEP_SECTION' | 'IMPASSABLE_SECTION' | 'NO_ROUTE' | 'STRAIGHT_LINE_BLOCKED' | 'EXCEEDS_EVA_LIMIT';
+  message: string;
+};
+
+type SlopeClass = {
+  maxDeg: number;
+  multiplier: number | null;
+};
+
 type RouteResult = {
   found: boolean;
   path: RasterPoint[];
   metrics: RouteMetrics;
-  warnings: unknown[];
+  warnings: RouteWarning[];
+  options: {
+    slopeClasses: SlopeClass[];
+  };
 };
 
 type Meta = {
@@ -58,6 +71,33 @@ const toLatLng = ({ row, col }: RasterPoint, meta: Meta): [number, number] => {
   const fractionX = (col + 0.5) / meta.width;
   const fractionY = (row + 0.5) / meta.height;
   return [(Math.atan(Math.sinh(Math.PI * (1 - 2 * fractionY))) * 180) / Math.PI, fractionX * 360 - 180];
+};
+
+const isImpassable = (result: RouteResult) =>
+  !result.found || result.warnings.some((warning) => warning.code === 'IMPASSABLE_SECTION' || warning.code === 'NO_ROUTE');
+
+const steepRange = (slopeClasses: SlopeClass[]) => {
+  const index = slopeClasses.findIndex((slopeClass) => slopeClass.multiplier !== null && slopeClass.multiplier >= 2);
+  if (index === -1) {
+    return '';
+  }
+  const lower = index > 0 ? slopeClasses[index - 1].maxDeg : 0;
+  return ` (${lower}-${slopeClasses[index].maxDeg} degrees)`;
+};
+
+const warningLabels = (result: RouteResult) => {
+  const labels = result.warnings
+    .filter((warning) => warning.code !== 'STRAIGHT_LINE_BLOCKED')
+    .map((warning) => {
+      if (warning.code === 'STEEP_SECTION') {
+        return `Steep section${steepRange(result.options.slopeClasses)}`;
+      }
+      if (warning.code === 'EXCEEDS_EVA_LIMIT') {
+        return 'Exceeds EVA limit';
+      }
+      return warning.message;
+    });
+  return [...new Set(labels)];
 };
 
 const formatMinutes = (minutes: number) => {
@@ -105,7 +145,13 @@ export function MapPage() {
       .catch((error: Error) => setStatus(error.message));
     fetch('/api/route/default')
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error(`Route request failed with status ${response.status}.`))))
-      .then(setRoute)
+      .then((result: RouteResult) => {
+        if (isImpassable(result)) {
+          setStatus('Default route is impassable.');
+          return;
+        }
+        setRoute(result);
+      })
       .catch((error: Error) => setStatus(error.message));
   }, []);
 
@@ -158,8 +204,13 @@ export function MapPage() {
       if (currentRequest !== requestId.current) {
         return;
       }
+      if (isImpassable(result)) {
+        setRoute(null);
+        setStatus('Route is impassable. Try different pins.');
+        return;
+      }
       setRoute(result);
-      setStatus(result.found ? null : 'No safe route found between the pins.');
+      setStatus(null);
     } catch (error) {
       if (currentRequest !== requestId.current) {
         return;
@@ -191,6 +242,7 @@ export function MapPage() {
                   <Stat label="Length" value={metrics ? formatDistance(metrics.distance2d) : '—'} />
                   <Stat label="Ascent" value={metrics ? `${metrics.ascent.toFixed(1)} m` : '—'} />
                   <Stat label="Descent" value={metrics ? `${metrics.descent.toFixed(1)} m` : '—'} />
+                  <Stat label="Radiation dose" value={metrics ? `${metrics.doseMSv.toFixed(3)} mSv` : '—'} />
                 </SimpleGrid>
               </Paper>
 
@@ -198,11 +250,17 @@ export function MapPage() {
                 <Title order={2} className={classes.panelTitle}>Conditions</Title>
                 <Divider my="md" />
                 <SimpleGrid cols={2} spacing="lg" verticalSpacing="lg">
-                  <Stat label="Radiation dose" value={metrics ? `${metrics.doseMSv.toFixed(3)} mSv` : '—'} />
                   <Stat label="Radiation rate" value={meta ? `${Number(meta.defaults.doseRateMSvPerDay.toPrecision(6))} mSv/day` : '—'} />
                   <Stat label="Max slope" value={metrics ? `${metrics.maxSlope.toFixed(1)}°` : '—'} />
                   <Stat label="Mean slope" value={metrics ? `${metrics.meanSlope.toFixed(1)}°` : '—'} />
-                  <Stat label="Warnings" value={route ? `${route.warnings.length}` : '—'} />
+                  <div className={`${classes.stat} ${classes.fullWidth}`}>
+                    <Text className={classes.statLabel}>Warnings</Text>
+                    {route && warningLabels(route).length > 0
+                      ? warningLabels(route).map((label) => (
+                          <Text key={label} className={classes.statValue}>{label}</Text>
+                        ))
+                      : <Text className={classes.statValue}>{route ? 'n/a' : '—'}</Text>}
+                  </div>
                 </SimpleGrid>
               </Paper>
 

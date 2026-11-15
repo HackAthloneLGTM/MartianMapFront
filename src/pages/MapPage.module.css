@@ -93,3 +93,7 @@
   font-size: var(--mantine-font-size-lg);
   letter-spacing: -0.02em;
 }
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
