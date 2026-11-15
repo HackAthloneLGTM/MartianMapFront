@@ -1,78 +1,43 @@
-# React + TypeScript + Vite
+# Jezero Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A route planner for astronaut EVAs (spacewalks on foot) in Jezero Crater, Mars. Drop two pins on the map, and Jezero Planner finds a route that avoids steep terrain. It also estimates how long the walk takes and the radiation dose along the way.
 
-Currently, two official plugins are available:
+This repo is the web frontend. The routing, terrain and radiation logic live in [MartianMapBack](https://github.com/HackAthloneLGTM/MartianMapBack).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Interactive terrain map**: slope and elevation layers from NASA's HiRISE terrain model, which you can switch between.
+- **Click-to-plan routes**: place pin A and pin B. The route is calculated straight away and drawn on the map.
+- **Route panel**: time remaining, one-way time, route length, ascent, descent and radiation dose.
+- **Conditions panel**: live radiation rate from Curiosity's RAD instrument, max and mean slope, and route warnings (for example, "Steep section (10-15 degrees)").
+- **Impassable routes are rejected**: routes that would cross impassable terrain aren't shown.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech stack
 
-## Expanding the ESLint configuration
+React 19, TypeScript, Vite, [Mantine](https://mantine.dev) and [React Leaflet](https://react-leaflet.js.org).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Running locally
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. Start the backend (see the MartianMapBack README). By default it serves on `http://localhost:3001`.
+2. Start the frontend:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   ```sh
+   npm install
+   npm run dev
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3. Open `http://localhost:5173`.
 
-```
+In development, Vite forwards `/api/*` requests to the backend on port 3001.
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Type-check and build for production |
+| `npm run preview` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
 ## Credits
 
