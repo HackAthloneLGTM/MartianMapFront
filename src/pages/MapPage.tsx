@@ -18,7 +18,6 @@ type Pin = {
 
 type RouteMetrics = {
   distance2d: number;
-  distance3d: number;
   ascent: number;
   descent: number;
   maxSlope: number;
@@ -190,7 +189,6 @@ export function MapPage() {
                   <Stat label="Time remaining" value={metrics ? formatMinutes(metrics.totalEvaMinutes) : '—'} />
                   <Stat label="One way" value={metrics ? formatMinutes(metrics.oneWayMinutes) : '—'} />
                   <Stat label="Length" value={metrics ? formatDistance(metrics.distance2d) : '—'} />
-                  <Stat label="Surface length" value={metrics ? formatDistance(metrics.distance3d) : '—'} />
                   <Stat label="Ascent" value={metrics ? `${metrics.ascent.toFixed(1)} m` : '—'} />
                   <Stat label="Descent" value={metrics ? `${metrics.descent.toFixed(1)} m` : '—'} />
                 </SimpleGrid>
