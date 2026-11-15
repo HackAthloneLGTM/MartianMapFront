@@ -1,4 +1,4 @@
-import { MapContainer, Marker, Polyline, TileLayer, useMapEvents } from 'react-leaflet';
+import { MapContainer, Marker, Polyline, TileLayer, Tooltip, useMapEvents } from 'react-leaflet';
 import type { LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import classes from './MapPage.module.css';
@@ -342,8 +342,16 @@ export function MapPage() {
                   noWrap
                   url={`http://localhost:3001/${currentMap.tileName}/{z}/{x}/{y}/png`}
                 />
-                {pinA && <Marker position={pinA.position} />}
-                {pinB && <Marker position={pinB.position} />}
+                {pinA && (
+                  <Marker position={pinA.position}>
+                    <Tooltip permanent={true}>Start</Tooltip>
+                  </Marker>
+                )}
+                {pinB && (
+                  <Marker position={pinB.position}>
+                    <Tooltip permanent={true}>End</Tooltip>
+                  </Marker>
+                )}
                 {routeLine && <Polyline positions={routeLine} pathOptions={{ color: colorScheme === 'dark' ? '#ffffff' : '#000000', weight: 3 }} />}
               </MapContainer>
             </div>
