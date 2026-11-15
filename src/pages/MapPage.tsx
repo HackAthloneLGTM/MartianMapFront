@@ -64,8 +64,16 @@ const ELEVATION_COLORS = ['#2b83ba', '#abdda4', '#ffffbf', '#fdae61', '#d7191c']
 
 const SLOPE_COLORS = ['#1a9641', '#a6d96a', '#fdae61', '#d7191c'];
 
-function MapKey({ whichMap, meta }: { whichMap: boolean; meta: Meta }) {
-  if (whichMap) {
+const MAPS = [
+  { label: 'Slope', tileName: 'map_slope' },
+  { label: 'Elevation', tileName: 'map_elevation' },
+  { label: 'Optical', tileName: 'map_optical' },
+] as const;
+
+const getMapIndex = (whichMap: number) => ((whichMap % MAPS.length) + MAPS.length) % MAPS.length;
+
+function MapKey({ mapIndex, meta }: { mapIndex: number; meta: Meta }) {
+  if (mapIndex === 1) {
     return (
       <div className={classes.key}>
         <div className={classes.keyGradient} style={{ background: `linear-gradient(to right, ${ELEVATION_COLORS.join(', ')})` }} />
@@ -75,6 +83,10 @@ function MapKey({ whichMap, meta }: { whichMap: boolean; meta: Meta }) {
         </Group>
       </div>
     );
+  }
+
+  if (mapIndex === 2) {
+    return null;
   }
 
   return (
@@ -166,7 +178,7 @@ function MapClickHandler({ onPlacePin }: { onPlacePin: (position: [number, numbe
 }
 
 export function MapPage() {
-  const [whichMap, setWhichMap] = useState(false);
+  const [whichMap, setWhichMap] = useState(0);
   const [pinA, setPinA] = useState<Pin | null>(null);
   const [pinB, setPinB] = useState<Pin | null>(null);
   const [pinAIsLeastRecentlyUsed, setPinAIsLeastRecentlyUsed] = useState(true);
@@ -258,6 +270,8 @@ export function MapPage() {
 
   const metrics = route?.found ? route.metrics : null;
   const colorScheme = useComputedColorScheme('dark');
+  const mapIndex = getMapIndex(whichMap);
+  const currentMap = MAPS[mapIndex];
   const routeLine = route?.found && meta ? route.path.map((point) => toLatLng(point, meta)) : null;
 
   return (
@@ -290,6 +304,7 @@ export function MapPage() {
                   <Stat label="Radiation rate" value={meta ? `${Number(meta.defaults.doseRateMSvPerDay.toPrecision(6))} mSv/day` : '—'} />
                   <Stat label="Max slope" value={metrics ? `${metrics.maxSlope.toFixed(1)}°` : '—'} />
                   <Stat label="Mean slope" value={metrics ? `${metrics.meanSlope.toFixed(1)}°` : '—'} />
+                  <Stat label="Walking speed" value={meta ? `${Number(meta.defaults.walkingSpeedKmh.toPrecision(4))} km/h` : '—'} />
                   <div className={`${classes.stat} ${classes.fullWidth}`}>
                     <Text className={classes.statLabel}>Warnings</Text>
                     {route && warningLabels(route).length > 0
@@ -306,7 +321,7 @@ export function MapPage() {
 
           <Grid.Col span={{ base: 12, md: 7 }}>
             <Group justify="space-between" mb="xs">
-              <Text className={classes.statLabel}>{whichMap ? 'Elevation' : 'Slope'}</Text>
+              <Text className={classes.statLabel}>{currentMap.label}</Text>
               <Text className={classes.statLabel}>{pinA && pinB ? 'A → B placed' : pinA ? 'Place pin B' : 'Place pin A'}</Text>
             </Group>
             <div className={classes.mapWrapper}>
@@ -322,27 +337,22 @@ export function MapPage() {
                 scrollWheelZoom
               >
                 <MapClickHandler onPlacePin={placePin} />
-                {whichMap ?
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   noWrap
-                  url="http://localhost:3001/map_elevation/{z}/{x}/{y}/png"
-                /> : <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  noWrap
-                  url="http://localhost:3001/map_slope/{z}/{x}/{y}/png"
-                />}
+                  url={`http://localhost:3001/${currentMap.tileName}/{z}/{x}/{y}/png`}
+                />
                 {pinA && <Marker position={pinA.position} />}
                 {pinB && <Marker position={pinB.position} />}
                 {routeLine && <Polyline positions={routeLine} pathOptions={{ color: colorScheme === 'dark' ? '#ffffff' : '#000000', weight: 3 }} />}
               </MapContainer>
             </div>
-            {meta && <MapKey whichMap={whichMap} meta={meta} />}
+            {meta && <MapKey mapIndex={mapIndex} meta={meta} />}
             <Container className={classes.buttonContainer}>
               <Group justify="center">
                 <Button onClick={clearPins} variant="default" w={220} className={classes.button}>Clear pins</Button>
-                <Button onClick={() => setWhichMap(!whichMap)} variant="default" w={220} className={classes.button}>
-                  {whichMap ? 'Show Slope Map' : 'Show Elevation Map'}
+                <Button onClick={() => setWhichMap((whichMap + 1) % MAPS.length)} variant="default" w={220} className={classes.button}>
+                  Show {MAPS[(mapIndex + 1) % MAPS.length].label} Map
                 </Button>
               </Group>
               {status && <Text size="sm" ff="monospace" c="dimmed">{status}</Text>}
