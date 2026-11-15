@@ -300,9 +300,9 @@ export function MapPage() {
               </MapContainer>
             </div>
             <Container className={classes.buttonContainer}>
-              <Group>
-                <Button onClick={clearPins} variant="default" className={classes.button}>Clear pins</Button>
-                <Button onClick={() => setWhichMap(!whichMap)} variant="default" className={classes.button}>
+              <Group justify="center">
+                <Button onClick={clearPins} variant="default" w={220} className={classes.button}>Clear pins</Button>
+                <Button onClick={() => setWhichMap(!whichMap)} variant="default" w={220} className={classes.button}>
                   {whichMap ? 'Show Slope Map' : 'Show Elevation Map'}
                 </Button>
               </Group>

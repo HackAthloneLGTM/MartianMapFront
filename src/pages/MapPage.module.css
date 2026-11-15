@@ -21,7 +21,7 @@
 .buttonContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--mantine-spacing-xs);
   padding: 0;
   margin: var(--mantine-spacing-md) 0 0;
