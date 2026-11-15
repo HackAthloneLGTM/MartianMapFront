@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import classes from './MapPage.module.css';
 import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Container, Divider, Grid, Group, Paper, SimpleGrid, Stack, Text, Title, useComputedColorScheme } from '@mantine/core';
+import { IconAlertTriangle } from '@tabler/icons-react';
 
 type RasterPoint = {
   row: number;
@@ -272,6 +273,7 @@ export function MapPage() {
   const colorScheme = useComputedColorScheme('dark');
   const mapIndex = getMapIndex(whichMap);
   const currentMap = MAPS[mapIndex];
+  const warnings = route ? warningLabels(route) : [];
   const routeLine = route?.found && meta ? route.path.map((point) => toLatLng(point, meta)) : null;
 
   return (
@@ -298,7 +300,10 @@ export function MapPage() {
               </Paper>
 
               <Paper withBorder p="lg" className={classes.panel}>
-                <Title order={2} className={classes.panelTitle}>Conditions</Title>
+                <Group gap="xs">
+                  <Title order={2} className={classes.panelTitle}>Conditions</Title>
+                  {warnings.length > 0 && <IconAlertTriangle color='orange' size={18} aria-label="Warnings present" />}
+                </Group>
                 <Divider my="md" />
                 <SimpleGrid cols={2} spacing="lg" verticalSpacing="lg">
                   <Stat label="Radiation rate" value={meta ? `${Number(meta.defaults.doseRateMSvPerDay.toPrecision(6))} mSv/day` : '—'} />
@@ -307,8 +312,8 @@ export function MapPage() {
                   <Stat label="Walking speed" value={meta ? `${Number(meta.defaults.walkingSpeedKmh.toPrecision(4))} km/h` : '—'} />
                   <div className={`${classes.stat} ${classes.fullWidth}`}>
                     <Text className={classes.statLabel}>Warnings</Text>
-                    {route && warningLabels(route).length > 0
-                      ? warningLabels(route).map((label) => (
+                    {warnings.length > 0
+                      ? warnings.map((label) => (
                           <Text key={label} className={classes.statValue}>{label}</Text>
                         ))
                       : <Text className={classes.statValue}>{route ? 'n/a' : '—'}</Text>}
