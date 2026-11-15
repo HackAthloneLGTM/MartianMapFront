@@ -323,6 +323,11 @@ export function MapPage() {
             <Text className={classes.statLabel}>Jezero Crater, Mars</Text>
           </Stack>
         </Group>
+        <Divider my="md" />
+        <Group justify="space-between">
+          <Text className={classes.statLabel}>© 2026 HackAthloneLGTM · MIT License</Text>
+          <Text className={classes.statLabel}>Terrain data: NASA/JPL/University of Arizona</Text>
+        </Group>
       </Box>
     </>
   );
