@@ -2,7 +2,7 @@ import { MapContainer, Marker, Polyline, TileLayer, useMapEvents } from 'react-l
 import type { LeafletMouseEvent } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import classes from './MapPage.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, Button, Container, Divider, Grid, Group, Paper, SimpleGrid, Stack, Text, Title, useComputedColorScheme } from '@mantine/core';
 import "./moveme.css"
 
@@ -97,6 +97,7 @@ export function MapPage() {
   const [status, setStatus] = useState<string | null>(null);
   const [route, setRoute] = useState<RouteResult | null>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
+  const requestId = useRef(0);
 
   useEffect(() => {
     fetch('/api/meta')
@@ -120,34 +121,33 @@ export function MapPage() {
       position: [latitude, longitude] as [number, number],
     };
 
-    if (pinAIsLeastRecentlyUsed) {
-      setPinA(pin);
-    } else {
-      setPinB(pin);
-    }
+    const nextPinA = pinAIsLeastRecentlyUsed ? pin : pinA;
+    const nextPinB = pinAIsLeastRecentlyUsed ? pinB : pin;
+    setPinA(nextPinA);
+    setPinB(nextPinB);
     setPinAIsLeastRecentlyUsed(!pinAIsLeastRecentlyUsed);
     setStatus(null);
+    if (nextPinA && nextPinB) {
+      void calculatePath(nextPinA, nextPinB);
+    }
   };
 
   const clearPins = () => {
     setPinA(null);
     setPinB(null);
     setPinAIsLeastRecentlyUsed(true);
+    requestId.current += 1;
     setRoute(null);
     setStatus(null);
   };
 
-  const calculatePath = async () => {
-    if (!pinA || !pinB) {
-      setStatus('Place both pins before calculating a path.');
-      return;
-    }
-
+  const calculatePath = async (start: Pin, end: Pin) => {
+    const currentRequest = ++requestId.current;
     try {
       const response = await fetch('/api/route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ start: pinA.point, end: pinB.point }),
+        body: JSON.stringify({ start: start.point, end: end.point }),
       });
 
       if (!response.ok) {
@@ -156,9 +156,15 @@ export function MapPage() {
       }
 
       const result: RouteResult = await response.json();
+      if (currentRequest !== requestId.current) {
+        return;
+      }
       setRoute(result);
       setStatus(result.found ? null : 'No safe route found between the pins.');
     } catch (error) {
+      if (currentRequest !== requestId.current) {
+        return;
+      }
       setStatus(error instanceof Error ? error.message : 'Unable to calculate path.');
     }
   };
@@ -175,7 +181,7 @@ export function MapPage() {
           <Title order={1} className={classes.title}>Jezero Planner</Title>
         </Box>
         <Grid gap="xl">
-          <Grid.Col span={{ base: 12, md: 4 }}>
+          <Grid.Col span={{ base: 12, md: 5 }}>
             <Stack gap="lg">
               <Paper withBorder p="lg" className={classes.panel}>
                 <Title order={2} className={classes.panelTitle}>Route</Title>
@@ -202,20 +208,10 @@ export function MapPage() {
                 </SimpleGrid>
               </Paper>
 
-              <Container className={classes.buttonContainer}>
-                <Group>
-                  <Button onClick={calculatePath} disabled={!pinA || !pinB} color="dark" autoContrast className={classes.button}>Calculate path</Button>
-                  <Button onClick={clearPins} variant="default" className={classes.button}>Clear pins</Button>
-                  <Button onClick={() => setWhichMap(!whichMap)} variant="subtle" color="gray" className={classes.button}>
-                    {whichMap ? 'Show Slope Map' : 'Show Elevation Map'}
-                  </Button>
-                </Group>
-                {status && <Text size="sm" ff="monospace" c="dimmed">{status}</Text>}
-              </Container>
             </Stack>
           </Grid.Col>
 
-          <Grid.Col span={{ base: 12, md: 8 }}>
+          <Grid.Col span={{ base: 12, md: 7 }}>
             <Group justify="space-between" mb="xs">
               <Text className={classes.statLabel}>{whichMap ? 'Elevation' : 'Slope'}</Text>
               <Text className={classes.statLabel}>{pinA && pinB ? 'A → B placed' : pinA ? 'Place pin B' : 'Place pin A'}</Text>
@@ -248,6 +244,15 @@ export function MapPage() {
                 {routeLine && <Polyline positions={routeLine} pathOptions={{ color: colorScheme === 'dark' ? '#ffffff' : '#000000', weight: 3 }} />}
               </MapContainer>
             </div>
+            <Container className={classes.buttonContainer}>
+              <Group>
+                <Button onClick={clearPins} variant="default" className={classes.button}>Clear pins</Button>
+                <Button onClick={() => setWhichMap(!whichMap)} variant="default" className={classes.button}>
+                  {whichMap ? 'Show Slope Map' : 'Show Elevation Map'}
+                </Button>
+              </Group>
+              {status && <Text size="sm" ff="monospace" c="dimmed">{status}</Text>}
+            </Container>
           </Grid.Col>
         </Grid>
       </main>

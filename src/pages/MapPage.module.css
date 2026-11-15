@@ -6,16 +6,16 @@
 }
 
 .mapWrapper {
-  width: min(100%, calc(100svh - 200px));
-  aspect-ratio: 1;
-  margin-inline: auto;
+  width: 100%;
+  height: calc(100svh - 260px);
+  min-height: 320px;
   position: relative;
-  border: 1px solid var(--mantine-color-default-border);
 }
 
 .map {
   width: 100%;
   height: 100%;
+  background-color: var(--mantine-color-body);
 }
 
 .buttonContainer {
@@ -24,6 +24,8 @@
   align-items: flex-start;
   gap: var(--mantine-spacing-xs);
   padding: 0;
+  margin: var(--mantine-spacing-md) 0 0;
+  max-width: none;
 }
 
 .footer {
