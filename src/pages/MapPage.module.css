@@ -1,14 +1,16 @@
 .page {
   width: 100%;
+  min-height: 100vh;
   padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-xl);
   box-sizing: border-box;
 }
 
 .mapWrapper {
-  width: min(100%, calc(100vh - 60px));
+  width: min(100%, calc(100svh - 200px));
   aspect-ratio: 1;
   margin-inline: auto;
   position: relative;
+  border: 1px solid var(--mantine-color-default-border);
 }
 
 .map {
@@ -17,19 +19,75 @@
 }
 
 .buttonContainer {
-  position: relative !important;
-  top: 25px !important;
-  z-index: 1000;
-  top: var(--mantine-spacing-md );
-  left: var(--mantine-spacing-md);
-  right: var(--mantine-spacing-md);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--mantine-spacing-xs);
-  pointer-events: none;
+  padding: 0;
 }
 
-.buttonContainer > * {
-  pointer-events: auto;
+.footer {
+  padding: calc(var(--mantine-spacing-xl) * 2) var(--mantine-spacing-md);
+  border-top: 1px solid var(--mantine-color-default-border);
+}
+
+.titleBlock {
+  padding-bottom: var(--mantine-spacing-lg);
+  margin-bottom: var(--mantine-spacing-xl);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.eyebrow {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+}
+
+.title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.panel {
+  background-color: transparent;
+}
+
+.panelTitle {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.stat {
+  border-left: 2px solid var(--mantine-color-default-border);
+  padding-left: var(--mantine-spacing-sm);
+}
+
+.statLabel {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+}
+
+.statValue {
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xl);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.button {
+  text-transform: uppercase;
+  font-size: var(--mantine-font-size-xs);
+}
+
+.footerTitle {
+  font-weight: 800;
+  font-size: var(--mantine-font-size-lg);
+  letter-spacing: -0.02em;
 }
